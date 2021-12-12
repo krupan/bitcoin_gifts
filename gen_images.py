@@ -16,7 +16,14 @@ def text_wrap(txt, width):
     return wrapped
 
 
-im = Image.open('BTC_PaperWallet_Design_blank.psd')
+wallet = Image.open('BTC_PaperWallet_Design_blank.psd')
+
+# letter paper: 8.5" x 11"
+page_aspect_ratio = 11/8.5
+x_size = wallet.size[0] + 200
+y_size = round(x_size * page_aspect_ratio)
+page = Image.new(mode='RGB', size=(x_size, y_size), color='white')
+
 pubkey_qr_pos = (35, 469)
 key_qr_size = (285, 285)
 pubkey_txt_pos = (350, 700)
@@ -35,7 +42,7 @@ amount_size = (96, 35)
 fnt = ImageFont.truetype("/usr/share/fonts/TTF/DejaVuSansCondensed.ttf", 20)
 fnt_mono = ImageFont.truetype("/usr/share/fonts/TTF/DejaVuSansMono.ttf", 20)
 # get a drawing context
-d = ImageDraw.Draw(im)
+wallet_draw = ImageDraw.Draw(wallet)
 
 zpub = "zpub6qNRjPvTFR4vs9KCrwRu1vJgjbKAH629e6TCVjxEY9tZoE9DbcuDZW5KZtFFieooAo5X8NHT9MtcdKJNi5w1EH7oR9RtHQeiQdd8ZnkUakq"
 zprv = "zprv6qNRjPvTFR4vs9KCrwRu1vJgjbKAH629e6TCVjxEY9tZoE9DbcuDZW5KZtFFieooAo5X8NHT9MtcdKJNi5w1EH7oR9RtHQeiQdd8ZnkUakq"
@@ -46,19 +53,23 @@ zprv = "zprv6qNRjPvTFR4vs9KCrwRu1vJgjbKAH629e6TCVjxEY9tZoE9DbcuDZW5KZtFFieooAo5X
 zpub_qr = qrcode.make(zpub, version=1, box_size=5)
 
 zpub_qr = zpub_qr.crop(inc_tuple((0, 0), -10) + inc_tuple(key_qr_size, -10))
-im.paste(zpub_qr, pubkey_qr_pos + inc_tuple(pubkey_qr_pos, key_qr_size[0]))
+wallet.paste(zpub_qr, pubkey_qr_pos + inc_tuple(pubkey_qr_pos, key_qr_size[0]))
 
 zprv_qr = qrcode.make(zprv, version=1, box_size=5)
 zprv_qr = zprv_qr.crop(inc_tuple((0, 0), -10) + inc_tuple(key_qr_size, -10))
-im.paste(zprv_qr, privkey_qr_pos + inc_tuple(privkey_qr_pos, key_qr_size[0]))
+wallet.paste(zprv_qr, privkey_qr_pos + inc_tuple(privkey_qr_pos, key_qr_size[0]))
 
-d.multiline_text(pubkey_txt_pos, text_wrap(zpub, pubkey_txt_char_width),
-                 font=fnt_mono, fill=(0, 0, 0))
-d.multiline_text(privkey_txt_pos, text_wrap(zprv, privkey_txt_char_width),
-                 font=fnt_mono, fill=(0, 0, 0))
-d.multiline_text(name_pos, "Bryan Murdock", font=fnt, fill=(0, 0, 0))
-d.multiline_text(amount_pos, "$5", font=fnt, fill=(0, 0, 0))
+wallet_draw.multiline_text(pubkey_txt_pos, text_wrap(zpub, pubkey_txt_char_width),
+                           font=fnt_mono, fill=(0, 0, 0))
+wallet_draw.multiline_text(privkey_txt_pos, text_wrap(zprv, privkey_txt_char_width),
+                           font=fnt_mono, fill=(0, 0, 0))
+wallet_draw.multiline_text(name_pos, "Bryan Murdock", font=fnt, fill=(0, 0, 0))
+wallet_draw.multiline_text(amount_pos, "$5", font=fnt, fill=(0, 0, 0))
 
+wallet = wallet.crop((0, 0) + wallet.size)
+page.paste(wallet, (100, 100))
+page.paste(wallet, (100, 100 + wallet.size[1]))
+page.paste(wallet, (100, 100 + (wallet.size[1]*2)))
 
-im.save('BTC_PaperWallet_Design.pdf')
+page.save('BTC_PaperWallet_Design.pdf')
 
