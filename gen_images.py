@@ -41,8 +41,9 @@ amount_pos = (1454,559)
 amount_size = (96, 35)
 
 # get a font
-fnt = ImageFont.truetype("/usr/share/fonts/TTF/DejaVuSansCondensed.ttf", 20)
-fnt_mono = ImageFont.truetype("/usr/share/fonts/TTF/DejaVuSansMono.ttf", 20)
+fnt = ImageFont.truetype("/usr/share/fonts/TTF/DejaVuSansCondensed.ttf", size=20)
+fnt_bigger = ImageFont.truetype("/usr/share/fonts/TTF/DejaVuSansCondensed.ttf", size=22)
+fnt_mono = ImageFont.truetype("/usr/share/fonts/TTF/DejaVuSansMono.ttf", size=20)
 # get a drawing context
 wallet_draw = ImageDraw.Draw(wallet)
 
@@ -107,13 +108,13 @@ bmurdock@gmail.com or 801-739-5754
 """
 swan_qr = qrcode.make(swan_url, version=1, box_size=5)
 wallet_back_draw = ImageDraw.Draw(wallet_back)
-wallet_back_draw.multiline_text((70, 70), text_first, font=fnt, fill=(0, 0, 0))
-wallet_back.paste(swan_qr, (70, 535))
-wallet_back_draw.multiline_text((70, 730), text_second, font=fnt, fill=(0, 0, 0))
+wallet_back_draw.multiline_text((35, 70), text_first, font=fnt_bigger, fill=(0, 0, 0))
+wallet_back.paste(swan_qr, (35, 570))
+wallet_back_draw.multiline_text((35, 770), text_second, font=fnt_bigger, fill=(0, 0, 0))
 wallet_back = wallet_back.rotate(90, expand=True)
 wallet_back_crop = wallet_back.crop((0, 0) + wallet_back.size)
 page_back.paste(wallet_back, (100, 100))
 page_back.paste(wallet_back, (100, 100 + wallet_back.size[1]))
 page_back.paste(wallet_back, (100, 100 + wallet_back.size[1]*2))
-page_back.save('BTC_PaperWallet_Design_back.pdf')
+page_back.save('BTC_PaperWallet_Design.pdf', append=True)
 
