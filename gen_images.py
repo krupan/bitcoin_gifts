@@ -17,12 +17,14 @@ def text_wrap(txt, width):
 
 
 wallet = Image.open('BTC_PaperWallet_Design_blank.psd')
+wallet_back = Image.new(mode='RGB', size=(wallet.size[1], wallet.size[0]), color='white')
 
 # letter paper: 8.5" x 11"
 page_aspect_ratio = 11/8.5
 x_size = wallet.size[0] + 200
 y_size = round(x_size * page_aspect_ratio)
 page = Image.new(mode='RGB', size=(x_size, y_size), color='white')
+page_back = Image.new(mode='RGB', size=(x_size, y_size), color='white')
 
 pubkey_qr_pos = (35, 469)
 key_qr_size = (285, 285)
@@ -72,4 +74,46 @@ page.paste(wallet, (100, 100 + wallet.size[1]))
 page.paste(wallet, (100, 100 + (wallet.size[1]*2)))
 
 page.save('BTC_PaperWallet_Design.pdf')
+
+# back page
+text_first = """Merry Christmas!  These codes are the keys to your new bitcoin
+wallet.  Keep them secret and safe (but I have kept a copy just in
+case you lose them)!  I recommend the BlueWallet phone app for doing
+anything with your bitcoin, but there are others you could choose.
+
+- To see how much bitcoin is in your wallet, scan the Public Key with
+  the BlueWallet app
+
+- To add bitcoin to your wallet, scan the Public Key with the
+  BlueWallet app and it will give you an address you can send bitcoin
+  to
+
+- To send your bitcoin somewhere (I don't recommend this, try hanging
+  on to it for a while and watch its value grow!), scan the Private
+  Key with the Blue Wallet app and enter the address you want to send
+  the bitcoin to
+
+To buy more bitcoin, I highly recommend using Swan Bitcoin.  If you
+sign up with this URL (or qrcode), Swan will give you $10 in bitcoin
+(full disclosure, I'll get some bitcoin from Swan too).
+"""
+
+swan_url = 'https://www.swanbitcoin.com/bdmurdock/'
+text_second = f"""{swan_url}
+
+If you have any other questions feel free to ask me:
+bmurdock@gmail.com or 801-739-5754
+
+"""
+swan_qr = qrcode.make(swan_url, version=1, box_size=5)
+wallet_back_draw = ImageDraw.Draw(wallet_back)
+wallet_back_draw.multiline_text((70, 70), text_first, font=fnt, fill=(0, 0, 0))
+wallet_back.paste(swan_qr, (70, 535))
+wallet_back_draw.multiline_text((70, 730), text_second, font=fnt, fill=(0, 0, 0))
+wallet_back = wallet_back.rotate(90, expand=True)
+wallet_back_crop = wallet_back.crop((0, 0) + wallet_back.size)
+page_back.paste(wallet_back, (100, 100))
+page_back.paste(wallet_back, (100, 100 + wallet_back.size[1]))
+page_back.paste(wallet_back, (100, 100 + wallet_back.size[1]*2))
+page_back.save('BTC_PaperWallet_Design_back.pdf')
 
