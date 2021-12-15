@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 import math
+import textwrap
 from pathlib import Path
 
 import qrcode
+from bitcoinlib.mnemonic import Mnemonic
+from bitcoinlib.wallets import Wallet
 from PIL import Image, ImageDraw, ImageFont
 
 
@@ -30,7 +33,7 @@ class PaperWallet:
         self.back = wallet_back
 
 
-def gen_paper_wallet(zpub, zprv):
+def gen_paper_wallet(name, zpub, zprv, seed_phrase):
     wallet = Image.open('BTC_PaperWallet_Design_blank.psd')
     wallet_back = Image.new(mode='RGB', size=(wallet.size[1], wallet.size[0]), color='white')
     pubkey_qr_pos = (35, 469)
@@ -42,10 +45,9 @@ def gen_paper_wallet(zpub, zprv):
     privkey_txt_pos = (1031, 45)
     privkey_txt_size = (485, 88)
     privkey_txt_char_width = 39
-    name_pos = (1207,558)
+    name_pos = (1213,560)
     name_size= (142, 36)
-    amount_pos = (1454,559)
-    amount_size = (96, 35)
+
     # get a font
     fnt = ImageFont.truetype("/usr/share/fonts/TTF/DejaVuSansCondensed.ttf", size=20)
     fnt_bigger = ImageFont.truetype("/usr/share/fonts/TTF/DejaVuSansCondensed.ttf", size=22)
@@ -70,45 +72,54 @@ def gen_paper_wallet(zpub, zprv):
                                font=fnt_mono, fill=(0, 0, 0))
     wallet_draw.multiline_text(privkey_txt_pos, text_wrap(zprv, privkey_txt_char_width),
                                font=fnt_mono, fill=(0, 0, 0))
-    wallet_draw.multiline_text(name_pos, "Bryan Murdock", font=fnt, fill=(0, 0, 0))
-    wallet_draw.multiline_text(amount_pos, "$5", font=fnt, fill=(0, 0, 0))
+    wallet_draw.multiline_text(name_pos, name, font=fnt, fill=(0, 0, 0))
 
     wallet = wallet.crop((0, 0) + wallet.size)
+    seed_phrase = textwrap.fill(seed_phrase, 70)
     # back page
-    text_first = """Merry Christmas!  These codes are the keys to your new bitcoin
-    wallet.  Keep them secret and safe (but I have kept a copy just in
-    case you lose them)!  I recommend the BlueWallet phone app for doing
-    anything with your bitcoin, but there are others you could choose.
+    text_first = f"""Merry Christmas!  These codes are the keys to your new bitcoin
+wallet.  Keep them secret and safe (but I have kept a copy just in
+case you lose them)!  Here is the random-English-words version of your
+keys that could come in handy (keep this secret and safe too!):
 
-    - To see how much bitcoin is in your wallet, scan the Public Key with
-      the BlueWallet app
+---
 
-    - To add bitcoin to your wallet, scan the Public Key with the
-      BlueWallet app and it will give you an address you can send bitcoin
-      to
+{seed_phrase}
 
-    - To send your bitcoin somewhere (I don't recommend this, try hanging
-      on to it for a while and watch its value grow!), scan the Private
-      Key with the Blue Wallet app and enter the address you want to send
-      the bitcoin to
+---
 
-    To buy more bitcoin, I highly recommend using Swan Bitcoin.  If you
-    sign up with this URL (or qrcode), Swan will give you $10 in bitcoin
-    (full disclosure, I'll get some bitcoin from Swan too).
-    """
+I recommend the BlueWallet phone app for doing
+anything with your bitcoin, but there are others you could choose.
+
+- To see how much bitcoin is in your wallet, scan the Public Key with
+  the BlueWallet app
+
+- To add bitcoin to your wallet, scan the Public Key with the
+  BlueWallet app and it will give you an address you can send bitcoin
+  to
+
+- To send your bitcoin somewhere (I don't recommend this, try hanging
+  on to it for a while and watch its value grow!), scan the Private
+  Key with the Blue Wallet app and enter the address you want to send
+  the bitcoin to
+
+To buy more bitcoin, I highly recommend using Swan Bitcoin.  If you
+sign up with this URL (or qrcode), Swan will give you $10 in bitcoin
+(full disclosure: I'll get some bitcoin from Swan too).
+"""
 
     swan_url = 'https://www.swanbitcoin.com/bdmurdock/'
     text_second = f"""{swan_url}
 
-    If you have any other questions feel free to ask me:
-    bmurdock@gmail.com or 801-739-5754
+If you have any other questions feel free to ask me:
+bmurdock@gmail.com or 801-739-5754
 
-    """
+"""
     swan_qr = qrcode.make(swan_url, version=1, box_size=5)
     wallet_back_draw = ImageDraw.Draw(wallet_back)
     wallet_back_draw.multiline_text((35, 70), text_first, font=fnt_bigger, fill=(0, 0, 0))
-    wallet_back.paste(swan_qr, (35, 570))
-    wallet_back_draw.multiline_text((35, 770), text_second, font=fnt_bigger, fill=(0, 0, 0))
+    wallet_back.paste(swan_qr, (35, 870))
+    wallet_back_draw.multiline_text((35, 1070), text_second, font=fnt_bigger, fill=(0, 0, 0))
     wallet_back = wallet_back.rotate(90, expand=True)
     wallet_back_crop = wallet_back.crop((0, 0) + wallet_back.size)
     return PaperWallet(wallet, wallet_back)
@@ -142,11 +153,14 @@ def gen_pages(wallets, output):
         page_back.save(output, append=True)
 
 
-zpub = "zpub6qNRjPvTFR4vs9KCrwRu1vJgjbKAH629e6TCVjxEY9tZoE9DbcuDZW5KZtFFieooAo5X8NHT9MtcdKJNi5w1EH7oR9RtHQeiQdd8ZnkUakq"
-zprv = "zprv6qNRjPvTFR4vs9KCrwRu1vJgjbKAH629e6TCVjxEY9tZoE9DbcuDZW5KZtFFieooAo5X8NHT9MtcdKJNi5w1EH7oR9RtHQeiQdd8ZnkUakq"
-
-wallets = []
-for i in range(28):
-    wallets.append(gen_paper_wallet(zpub=zpub, zprv=zprv))
+with open('names') as names:
+    wallets = []
+    for name in names:
+        name = name.rstrip()
+        seed_phrase = Mnemonic('english').generate(256)
+        w = Wallet.create(name, keys=seed_phrase, network='bitcoin', witness_type='segwit')
+        zprv = w.main_key.wif
+        zpub = w.public_master().wif
+        wallets.append(gen_paper_wallet(name=name, zpub=zpub, zprv=zprv, seed_phrase=seed_phrase))
 
 gen_pages(wallets, output='BTC_PaperWallet_Design.pdf')
