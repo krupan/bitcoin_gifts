@@ -159,8 +159,8 @@ with open('names') as names:
         name = name.rstrip()
         seed_phrase = Mnemonic('english').generate(256)
         w = Wallet.create(name, keys=seed_phrase, network='bitcoin', witness_type='segwit')
-        zprv = w.main_key.wif
-        zpub = w.public_master().wif
+        zprv = w.get_key().wif
+        zpub = w.wif()
         wallets.append(gen_paper_wallet(name=name, zpub=zpub, zprv=zprv, seed_phrase=seed_phrase))
 
 gen_pages(wallets, output='BTC_PaperWallet_Design.pdf')
