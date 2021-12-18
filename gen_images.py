@@ -77,19 +77,20 @@ def gen_paper_wallet(name, zpub, zprv, seed_phrase):
     wallet = wallet.crop((0, 0) + wallet.size)
     seed_phrase = textwrap.fill(seed_phrase, 70)
     # back page
-    text_first = f"""Merry Christmas!  These codes are the keys to your new bitcoin
-wallet.  Keep them secret and safe (but I have kept a copy just in
-case you lose them)!  Here is the random-English-words version of your
-keys that could come in handy (keep this secret and safe too!):
+    text_first = """Merry Christmas!  These codes are the keys to your new bitcoin wallet.
+Keep them secret and safe (but I have kept a copy just in case you
+lose them)!  Here is the random-English-words version of your keys
+that could come in handy (keep this secret and safe too!):
+
+---
+"""
+
+    text_second = f"""{seed_phrase}
 
 ---
 
-{seed_phrase}
-
----
-
-I recommend the BlueWallet phone app for doing
-anything with your bitcoin, but there are others you could choose.
+I recommend the BlueWallet phone app for doing anything with your
+bitcoin, but there are others you could choose.
 
 - To see how much bitcoin is in your wallet, scan the Public Key with
   the BlueWallet app
@@ -105,21 +106,23 @@ anything with your bitcoin, but there are others you could choose.
 
 To buy more bitcoin, I highly recommend using Swan Bitcoin.  If you
 sign up with this URL (or qrcode), Swan will give you $10 in bitcoin
-(full disclosure: I'll get some bitcoin from Swan too).
-"""
+(full disclosure: I'll get some bitcoin from Swan too).  """
 
     swan_url = 'https://www.swanbitcoin.com/bdmurdock/'
-    text_second = f"""{swan_url}
+    text_third = f"""{swan_url}
 
 If you have any other questions feel free to ask me:
 bmurdock@gmail.com or 801-739-5754
 
 """
+    seed_qr = qrcode.make(seed_phrase, version=1, box_size=5)
     swan_qr = qrcode.make(swan_url, version=1, box_size=5)
     wallet_back_draw = ImageDraw.Draw(wallet_back)
     wallet_back_draw.multiline_text((35, 70), text_first, font=fnt_bigger, fill=(0, 0, 0))
-    wallet_back.paste(swan_qr, (35, 870))
-    wallet_back_draw.multiline_text((35, 1070), text_second, font=fnt_bigger, fill=(0, 0, 0))
+    wallet_back.paste(seed_qr, (35, 220))
+    wallet_back_draw.multiline_text((35, 515), text_second, font=fnt_bigger, fill=(0, 0, 0))
+    wallet_back.paste(swan_qr, (35, 1130))
+    wallet_back_draw.multiline_text((35, 1300), text_third, font=fnt_bigger, fill=(0, 0, 0))
     wallet_back = wallet_back.rotate(90, expand=True)
     wallet_back_crop = wallet_back.crop((0, 0) + wallet_back.size)
     return PaperWallet(wallet, wallet_back)
