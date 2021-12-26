@@ -1,0 +1,51 @@
+* Bitcoin Gifts
+
+** Description
+
+This is a tool to create a number of bitcoin paper wallets suitable
+for printing out and giving as gifts.  A 256-bit [[https://learnmeabitcoin.com/technical/mnemonic][bip39 random seed
+phrase]] is generated and then a [[https://learnmeabitcoin.com/technical/hd-wallets][bip84 Hierarchical Deterministic Wallet]]
+is generated from that.  The paper wallet displays the [[https://learnmeabitcoin.com/technical/extended-keys][master extended
+keys]] for the wallet on the front and the seed phrase on the back,
+along with some other information about useful apps for importing the
+wallet and obtaining more bitcoin.
+
+** Dependencies
+
+This project is written in python and depends on the following python packages:
+
+- [[https://bitcoinlib.readthedocs.io/en/latest/index.html][Bitcoinlib]]
+- [[https://pypi.org/project/qrcode/][qrcode]]
+- [[https://pillow.readthedocs.io/en/stable/][Pillow]]
+
+** Use
+
+To generate some wallets, create a file in the same directory as the
+make_wallets script named =names=.  In that file, put a name per line
+for each wallet you'd like to generate.  Then run:
+
+#+begin_src sh
+  ./make_wallets
+#+end_src
+
+It will create a pd file name, =BTC_PAPERWallet_Design.pdf= in the
+same directory.
+
+It will also leave bitcoin wallets in Bitcoinlib's sqlite database.
+You can see the wallets that were created using the command-line
+wallet tools that comes with Bitcoinlib, like so:
+
+#+begin_src sh
+  clw --list-wallets
+#+end_src
+
+See the [[https://bitcoinlib.readthedocs.io/en/latest/source/_static/manuals.command-line-wallet.html][documentation on clw]] for more on that.
+
+** Future
+
+Ideally this would be easier to customize (for example, to replace my
+Swan Bitcoin referral URL with your own, or to use a different paper
+wallet template).  This is my first foray into generating images and
+pdf files with python and I'm sure I have lots to learn there.
+
+Pull requests are very welcome!
