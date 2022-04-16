@@ -28,7 +28,7 @@ for each wallet you'd like to generate.  Then run:
   ./make_wallets
 #+end_src
 
-It will create a pd file name, =BTC_PAPERWallet_Design.pdf= in the
+It will create a pdf file name, =BTC_PAPERWallet_Design.pdf= in the
 same directory.
 
 It will also leave bitcoin wallets in Bitcoinlib's sqlite database.
